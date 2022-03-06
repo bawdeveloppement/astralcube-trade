@@ -1,0 +1,6 @@
+{
+    "actrade.command.request": "Player %s sent you a trade request %s",
+    "actrade.command.accepted": "Player %s accepted your request",
+    "actrade.command.launching_trade": "Trade is starting in %s",
+    "actrade.command.accept_trade_text_button": "Accept Trade"
+}
