@@ -16,7 +16,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import fr.astralcube.actrade.ACTrade;
-import fr.astralcube.actrade.Trade;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -27,6 +26,14 @@ public class TradeArgumentType implements ArgumentType<UUID> {
     public static final SimpleCommandExceptionType INVALID_UUID = new SimpleCommandExceptionType(new TranslatableText("argument.uuid.invalid"));
     private static final Collection<String> EXAMPLES = Arrays.asList("dd12be42-52a9-4a91-a8a1-11c01849e498");
     private static final Pattern VALID_CHARACTERS = Pattern.compile("^([-A-Fa-f0-9]+)");
+
+    public static UUID getUuid(CommandContext<ServerCommandSource> context, String name) {
+        return context.getArgument(name, UUID.class);
+    }
+
+    public static TradeArgumentType uuid() {
+        return new TradeArgumentType();
+    }
 
     @Override
     public UUID parse(StringReader stringReader) throws CommandSyntaxException {

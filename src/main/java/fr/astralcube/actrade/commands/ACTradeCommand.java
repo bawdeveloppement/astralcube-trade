@@ -36,7 +36,7 @@ public class ACTradeCommand {
         ServerPlayerEntity senderPlayer = ctx.getSource().getPlayer();
 
         UUID senderPlayerUuid = senderPlayer.getUuid();
-        
+        boolean tradeExist = false;
         // If the receiverPlayer is not us
         if (receiverPlayer.getUuid() != senderPlayerUuid) {          
           for (Map.Entry<UUID, Trade> t : ACTrade.mapTrades.entrySet()) {
@@ -49,28 +49,29 @@ public class ACTradeCommand {
                 ACTrade.mapTrades.get(t.getKey()).reset();
                 ctx.getSource().sendFeedback(new TranslatableText("actrade.command.request_already_sent"), false);
                 receiverPlayer.sendMessage(new TranslatableText("actrade.command.request", ACTextUtil.parse(new StringReader("{\"text\":\""+ ctx.getSource().getPlayer().getEntityName() +"\", \"color\":\"yellow\"}")), ACTextUtil.parse(new StringReader("{\"translate\":\"actrade.command.accept_trade_text_button\",\"color\":\"blue\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade accept " + tempUuid +"\"}}"))), false);
-                break;
               }
               // A TRADE EXIST AND HAS ALREADY STARTED
               else if (tempTrade.currentTradeState == TradeState.STARTED) {
                 ctx.getSource().sendFeedback(new TranslatableText("actrade.command.request_already_sent_open_inv"), false);
-                break;
               }
               // THE REQUEST IS ALREADY PENDING
               else {
                 ctx.getSource().sendFeedback(new TranslatableText("actrade.command.the_request_is_already_pending"), false);
-                break;
               }
-            } else {
-              Trade newTrade = new Trade(senderPlayerUuid, receiverPlayer.getUuid());
-              UUID newUUID = UUID.randomUUID();
-              ACTrade.mapTrades.put(newUUID, newTrade);
-              receiverPlayer.sendMessage(new TranslatableText("actrade.command.request", ACTextUtil.parse(new StringReader("{\"text\":\""+ ctx.getSource().getPlayer().getEntityName() +"\", \"color\":\"yellow\"}")), ACTextUtil.parse(new StringReader("{\"translate\":\"actrade.command.accept_trade_text_button\",\"color\":\"blue\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade accept " + newUUID +"\"}}"))), false);
-              break;
+              tradeExist = true;
             }
           }
+          
+          if (!tradeExist) {
+            Trade newTrade = new Trade(senderPlayerUuid, receiverPlayer.getUuid());
+            UUID newUUID = UUID.randomUUID();
+            ACTrade.mapTrades.put(newUUID, newTrade);
+            receiverPlayer.sendMessage(new TranslatableText("actrade.command.request", ACTextUtil.parse(new StringReader("{\"text\":\""+ ctx.getSource().getPlayer().getEntityName() +"\", \"color\":\"yellow\"}")), ACTextUtil.parse(new StringReader("{\"translate\":\"actrade.command.accept_trade_text_button\",\"color\":\"blue\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade accept " + newUUID.toString() +"\"}}"))), false);
+          }
+
           return 1;
         } else {
+          senderPlayer.sendMessage(new TranslatableText("actrade.command.cannot_send_trade_oursef"), false);
           return 0;
         }
 
@@ -82,8 +83,8 @@ public class ACTradeCommand {
 		  LiteralCommandNode<ServerCommandSource> trade = CommandManager.literal("accept").build();
       root.addChild(trade);
 
-      ArgumentCommandNode<ServerCommandSource, UUID> tradIdArg = CommandManager.argument("tradeId", new TradeArgumentType()).executes(ctx -> {
-        UUID tradeUUID = UuidArgumentType.getUuid(ctx, "tradeId");
+      ArgumentCommandNode<ServerCommandSource, UUID> tradIdArg = CommandManager.argument("tradeId", TradeArgumentType.uuid()).executes(ctx -> {
+        UUID tradeUUID = TradeArgumentType.getUuid(ctx, "tradeId");
         Trade targetTrade = ACTrade.mapTrades.get(tradeUUID);
 
         for (Map.Entry<UUID, Trade> t : ACTrade.mapTrades.entrySet()) {
