@@ -23,6 +23,9 @@
     ],
     "client": [
       "fr.astralcube.actrade.client.ACTradeClient"
+    ],
+    "server": [
+      "fr.astralcube.actrade.dedicated.ACTradeServer"
     ]
   },
   "mixins": [

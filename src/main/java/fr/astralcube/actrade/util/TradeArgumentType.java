@@ -16,7 +16,10 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import fr.astralcube.actrade.ACTrade;
+import fr.astralcube.actrade.Trade.TradeState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
@@ -26,13 +29,20 @@ public class TradeArgumentType implements ArgumentType<UUID> {
     public static final SimpleCommandExceptionType INVALID_UUID = new SimpleCommandExceptionType(new TranslatableText("argument.uuid.invalid"));
     private static final Collection<String> EXAMPLES = Arrays.asList("dd12be42-52a9-4a91-a8a1-11c01849e498");
     private static final Pattern VALID_CHARACTERS = Pattern.compile("^([-A-Fa-f0-9]+)");
+    private static UUID ownerCommaUuid;
+    final TradeState tradeState;
 
-    public static UUID getUuid(CommandContext<ServerCommandSource> context, String name) {
+    protected TradeArgumentType(TradeState tState) {
+        this.tradeState = tState;
+    }
+
+    public static UUID getTrade(CommandContext<ServerCommandSource> context, String name, UUID player) {
+        ownerCommaUuid = player;
         return context.getArgument(name, UUID.class);
     }
 
-    public static TradeArgumentType uuid() {
-        return new TradeArgumentType();
+    public static TradeArgumentType trades(TradeState tState) {
+        return new TradeArgumentType(tState);
     }
 
     @Override
@@ -58,7 +68,7 @@ public class TradeArgumentType implements ArgumentType<UUID> {
         if (context.getSource() instanceof CommandSource) {
             StringReader stringReader = new StringReader(builder2.getInput());
             stringReader.setCursor(builder2.getStart());
-            Collection<String> collection = ACTradeUtil.getTradesUUIDOfPlayer(MinecraftServer.ANONYMOUS_PLAYER_PROFILE.getName(), ACTrade.mapTrades);
+            Collection<String> collection = ACTradeUtil.getTradesUUIDOfPlayer(ownerCommaUuid, ACTrade.mapTrades);
             return CommandSource.suggestMatching(collection, builder2);
         }
         return Suggestions.empty();

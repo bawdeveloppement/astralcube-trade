@@ -2,5 +2,16 @@
     "actrade.command.request": "Player %s sent you a trade request %s",
     "actrade.command.accepted": "Player %s accepted your request",
     "actrade.command.launching_trade": "Trade is starting in %s",
-    "actrade.command.accept_trade_text_button": "Accept Trade"
+    "actrade.command.accept_trade_text_button": "Accept Trade",
+    "actrade.command.trade_already_accepted_open_inv": "The trade %s has been accepted. %s",
+    "actrade.command.trade_accepted_you_can_open_inv": "The trade has been accepted by %s you can %s",
+    "actrade.command.trade_already_started": "The trade already started",
+    "actrade.command.current_trade_hasnot_started": "The current trade has not started",
+    "actrade.command.trade_already_finished": "The trade already finished",
+    "actrade.command.trade_text_list_element": "%s: Trade with %s | %s / %s",
+    "actrade.command.player_x_is_in_trade_box": "Player %s is in trade box",
+    "actrade.command.trade_with_x_has_been_closed": "Trade with %s has been closed",
+    "actrade.command.trade_with_x_already_started_open_inv": "Trade with %s already started. %s / %s",
+    "actrade.command.trade_page": "<< < > >>",
+    "actrade.gui.trade.screenTitle": "Trade with %s"
 }

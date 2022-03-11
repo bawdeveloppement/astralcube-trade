@@ -16,11 +16,12 @@ public class ACNetworkHandler {
 	
 	public static void switchScreen(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
 		UUID tradeUuid = buf.readUuid();
+		String playerName = buf.readString();
 		
 		server.execute(() -> {
 			if(player != null) {
                 player.closeScreenHandler();
-                player.openHandledScreen(new ACScreenProvider(tradeUuid));
+                player.openHandledScreen(new ACScreenProvider(tradeUuid,playerName));
 			}
 		});
 	}

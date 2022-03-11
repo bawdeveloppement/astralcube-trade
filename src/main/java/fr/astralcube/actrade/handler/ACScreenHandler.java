@@ -3,39 +3,72 @@ package fr.astralcube.actrade.handler;
 import java.util.UUID;
 
 import fr.astralcube.actrade.ACTrade;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerListener;
+import net.minecraft.screen.ScreenHandlerSyncHandler;
 import net.minecraft.screen.slot.Slot;
 
 public class ACScreenHandler extends ScreenHandler {
 	private final UUID tradeUuid;
 	private Inventory senderInventory;
-	private Inventory targetInventory;
+	private Inventory receiverInventory;
+    private TextFieldWidget searchBox;
+
+    public ACScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+        this(syncId, playerInventory, buf.readUuid());
+    }
 	
-	public ACScreenHandler(int syncId, PlayerInventory inv,  UUID tradeId) {
+    public ACScreenHandler(int syncId, PlayerInventory playerInventory,  UUID tradeId) {
 		super(ACTrade.AC_SCREEN, syncId);
+        this.senderInventory =  new SimpleInventory(9);
+        this.receiverInventory =  new SimpleInventory(9);
+        // checkSize(ACTrade.mapTrades.get(tradeId).senderInventory, 9);
+        // checkSize(ACTrade.mapTrades.get(tradeId).targetInventory, 9);
 		this.tradeUuid = tradeId;
+
 		ACTrade.trades.forEach(action -> {
 			if (action.tradeUuid == tradeId) {
 				this.senderInventory = new SimpleInventory(9);
-				this.targetInventory = new SimpleInventory(9);
+				this.receiverInventory = new SimpleInventory(9);
 			}
 		});
-
+        
 		int m;
         int l;
+        for (m = 0; m < 3; ++m) {
+            for (l = 0; l < 3; ++l) {
+                this.addSlot(new Slot(this.senderInventory, l + m * 3, 8 + l * 18, 18 + m * 18));
+            }
+        }
+        
+        for (m = 0; m < 3; ++m) {
+            for (l = 0; l < 3; ++l) {
+                this.addSlot(new Slot(this.receiverInventory, l + m * 3, 116 + l * 18, 18 + m * 18));
+            }
+        }
+
 		//The player inventory
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(inv, l + m * 9 + 9, 8 + l * 18, 84 + m * 18));
+                this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 101 + m * 18));
             }
         }
+
+        //The player Hotbar
+        for (m = 0; m < 9; ++m) {
+            this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 159));
+        }
 	}
-	
+
+
+
 	@Override
 	public boolean canUse(PlayerEntity player) {
 		return true;
@@ -50,11 +83,18 @@ public class ACScreenHandler extends ScreenHandler {
         if (slot != null && slot.hasStack()) {
             ItemStack originalStack = slot.getStack();
             newStack = originalStack.copy();
-            if (invSlot < this.targetInventory.size()) {
-                if (!this.insertItem(originalStack, this.targetInventory.size(), this.slots.size(), true)) {
+            if (invSlot < this.receiverInventory.size()) {
+                if (!this.insertItem(originalStack, this.receiverInventory.size(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(originalStack, 0, this.targetInventory.size(), false)) {
+            } else if (!this.insertItem(originalStack, 0, this.receiverInventory.size(), false)) {
+                return ItemStack.EMPTY;
+            }
+            if (invSlot < this.senderInventory.size()) {
+                if (!this.insertItem(originalStack, this.senderInventory.size(), this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!this.insertItem(originalStack, 0, this.senderInventory.size(), false)) {
                 return ItemStack.EMPTY;
             }
  
@@ -66,5 +106,17 @@ public class ACScreenHandler extends ScreenHandler {
         }
  
         return newStack;
+    }
+
+
+    @Override
+    public void addListener(ScreenHandlerListener listener) {
+        // TODO Auto-generated method stub
+        super.addListener(listener);
+    }
+
+    @Override
+    public void updateSyncHandler(ScreenHandlerSyncHandler handler) {
+        super.updateSyncHandler(handler);
     }
 }

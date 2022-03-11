@@ -42,8 +42,7 @@ public class ACTrade implements ModInitializer {
 		// Proceed with mild caution.
 		CommandRegistrationCallback.EVENT.register(ACTradeCommand::init);
 		ServerPlayNetworking.registerGlobalReceiver(AC_TRADE_SCREEN_ID, ACNetworkHandler::switchScreen);
-		
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("Hello Fabric world! shot_");
 	}
 
 	
