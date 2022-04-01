@@ -23,7 +23,7 @@ This template is available under the CC0 license. Feel free to learn from it and
     -> add in slot "back" of Trinkets 
 - Fork of FabricTailor and create shop of skin
 
-Ores -> Tin / Icon / Titanium / Runite / Meteorite / Adamantium
+Ores -> Tin / Iron / Titanium / Runite / Meteorite / Adamantium
 - Client light with only gameplay mods
 - Client medium with hud content
 - Client fancy with graphics mo

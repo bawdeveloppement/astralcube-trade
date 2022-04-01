@@ -3,6 +3,7 @@ package fr.astralcube.actrade.handler;
 import java.util.UUID;
 
 import fr.astralcube.actrade.ACTrade;
+import fr.astralcube.actrade.util.ACTradeUtil;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -83,20 +84,24 @@ public class ACScreenHandler extends ScreenHandler {
         if (slot != null && slot.hasStack()) {
             ItemStack originalStack = slot.getStack();
             newStack = originalStack.copy();
-            if (invSlot < this.receiverInventory.size()) {
-                if (!this.insertItem(originalStack, this.receiverInventory.size(), this.slots.size(), true)) {
+            if (ACTradeUtil.areWeSender(this.tradeUuid, player.getUuid())) {
+                if (invSlot < this.receiverInventory.size()) {
+                    if (!this.insertItem(originalStack, this.receiverInventory.size(), this.slots.size(), true)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (!this.insertItem(originalStack, 0, this.receiverInventory.size(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(originalStack, 0, this.receiverInventory.size(), false)) {
-                return ItemStack.EMPTY;
-            }
-            if (invSlot < this.senderInventory.size()) {
-                if (!this.insertItem(originalStack, this.senderInventory.size(), this.slots.size(), true)) {
+            } else {
+                if (invSlot < this.senderInventory.size()) {
+                    if (!this.insertItem(originalStack, this.senderInventory.size(), this.slots.size(), true)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (!this.insertItem(originalStack, 0, this.senderInventory.size(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(originalStack, 0, this.senderInventory.size(), false)) {
-                return ItemStack.EMPTY;
             }
+
  
             if (originalStack.isEmpty()) {
                 slot.setStack(ItemStack.EMPTY);

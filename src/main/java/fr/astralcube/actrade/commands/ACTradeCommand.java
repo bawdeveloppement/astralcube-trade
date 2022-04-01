@@ -84,7 +84,11 @@ public class ACTradeCommand {
             UUID newUUID = UUID.randomUUID();
             Trade newTrade = new Trade(newUUID, senderPlayerUuid, receiverPlayer.getUuid());
             ACTrade.mapTrades.put(newUUID, newTrade);
-            receiverPlayer.sendMessage(new TranslatableText("actrade.command.request", ACTextUtil.parse(new StringReader("{\"text\":\""+ ctx.getSource().getPlayer().getEntityName() +"\", \"color\":\"yellow\"}")), ACTextUtil.parse(new StringReader("{\"translate\":\"actrade.command.accept_trade_text_button\",\"color\":\"blue\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade accept " + newUUID.toString() +"\"}}"))), false);
+            receiverPlayer.sendMessage(new TranslatableText("actrade.command.request", 
+            ACTextUtil.parse(new StringReader("{\"text\":\""+ ctx.getSource().getPlayer().getEntityName() +"\", \"color\":\"yellow\"}")),
+            ACTextUtil.parse(new StringReader("{\"translate\":\"actrade.command.accept_trade_text_button\",\"color\":\"blue\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade accept " + newUUID.toString() +"\"}}")),
+            ACTextUtil.parse(new StringReader("{\"text\":\"Reject\",\"color\":\"red\",\"clickEvent\":{\"action\":\"run_command\",\"\":\"blue\",\"value\":\"/trade reject " + newUUID.toString() +"\"}}"))
+            ), false);
           }
 
           return 1;
@@ -337,6 +341,27 @@ public class ACTradeCommand {
     }
 
     private static void registerReject (CommandNode<ServerCommandSource> root) {
+      LiteralCommandNode<ServerCommandSource> reject = CommandManager.literal("reject").requires(source -> source.hasPermissionLevel(1)).build();
+      root.addChild(reject);
+
+      ArgumentCommandNode<ServerCommandSource, UUID> tradIdArg = CommandManager.argument("tradeId", TradeArgumentType.trades(TradeState.PENDING)).executes(ctx -> {
+        // The trade should come from us
+        ServerPlayerEntity thisPlayer = ctx.getSource().getPlayer();
+        UUID targetTradeUuid = TradeArgumentType.getTrade(ctx, "tradeId", thisPlayer.getUuid());
+        Trade targetTrade = ACTrade.mapTrades.get(targetTradeUuid);
+        ServerPlayerEntity sP;
+        if (ACTradeUtil.areWeSender(targetTradeUuid, thisPlayer.getUuid())) {
+          sP = (ServerPlayerEntity)ctx.getSource().getWorld().getEntity(targetTrade.receiverUuid);
+          sP.sendMessage(new TranslatableText("actrade.command.trade_x_has_been_rejected", getColoredText(thisPlayer.getEntityName(), "yellow")), false);
+        } else {
+          sP = (ServerPlayerEntity)ctx.getSource().getWorld().getEntity(targetTrade.senderUuid);
+          sP.sendMessage(new TranslatableText("actrade.command.trade_x_has_been_rejected", getColoredText(thisPlayer.getEntityName(), "yellow")), false);
+        }
+        thisPlayer.sendMessage(new TranslatableText("actrade.command.trade_x_has_been_rejected", getColoredText(sP.getEntityName(), "yellow")), false);
+        ACTrade.mapTrades.remove(targetTradeUuid);
+        return 0;
+      }).build();
+      reject.addChild(tradIdArg);
       // If no player argument -> reject all pending requests
       // Send
       // List :
@@ -378,6 +403,7 @@ public class ACTradeCommand {
       if (!dedicated) {
         registerRequest(root);
         registerAccept(root);
+        registerReject(root);
         registerOpenTradeInv(root);
         registerList(root);
         registerClose(root);

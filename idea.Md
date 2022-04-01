@@ -1,0 +1,3 @@
+-> Request a trade = OK$
+-> Open the trade = OK
+-> 
